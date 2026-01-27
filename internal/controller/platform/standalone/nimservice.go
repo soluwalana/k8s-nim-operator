@@ -446,7 +446,10 @@ func (r *NIMServiceReconciler) reconcileNIMService(ctx context.Context, nimServi
 		if gpuResources != nil {
 			lwsParams.Resources = gpuResources
 		}
-
+		initContainerVolumeMounts := nimService.GetInitContainerVolumeMounts(modelPVC)
+		for idx := range lwsParams.InitContainers {
+			lwsParams.InitContainers[idx].VolumeMounts = initContainerVolumeMounts
+		}
 		renderFunc = func() (client.Object, error) {
 			result, err := renderer.LeaderWorkerSet(lwsParams)
 			if err != nil {
@@ -508,6 +511,10 @@ func (r *NIMServiceReconciler) reconcileNIMService(ctx context.Context, nimServi
 		// Auto assign GPU resources in case of the optimized profile
 		if gpuResources != nil {
 			deploymentParams.Resources = gpuResources
+		}
+		initContainerVolumeMounts := nimService.GetInitContainerVolumeMounts(modelPVC)
+		for idx := range deploymentParams.InitContainers {
+			deploymentParams.InitContainers[idx].VolumeMounts = initContainerVolumeMounts
 		}
 		renderFunc = func() (client.Object, error) {
 			result, err := renderer.Deployment(deploymentParams)

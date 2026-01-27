@@ -728,6 +728,14 @@ func (n *NIMService) GetVolumes(modelPVC *PersistentVolumeClaim) []corev1.Volume
 				},
 			},
 		},
+		{
+			Name: "scratch",
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{
+					Medium: corev1.StorageMediumDefault,
+				},
+			},
+		},
 	}
 	switch {
 	case modelPVC != nil:
@@ -868,10 +876,40 @@ func (n *NIMService) GetVolumeMounts(modelPVC *PersistentVolumeClaim) []corev1.V
 			Name:      "dshm",
 			MountPath: "/dev/shm",
 		},
+		{
+			Name:      "scratch",
+			MountPath: "/scratch",
+		},
 	}
 
 	if n.GetProxyCertConfigMap() != "" {
 		volumeMounts = append(volumeMounts, k8sutil.GetVolumesMountsForUpdatingCaCert()...)
+	}
+	return volumeMounts
+}
+
+func (n *NIMService) GetInitContainerVolumeMounts(modelPVC *PersistentVolumeClaim) []corev1.VolumeMount {
+	subPath := ""
+	if modelPVC != nil {
+		subPath = modelPVC.SubPath
+	}
+	volumeMounts := []corev1.VolumeMount{
+		{
+			Name:      "model-store",
+			MountPath: "/model-store",
+			SubPath:   subPath,
+		},
+		{
+			Name:      "dshm",
+			MountPath: "/dev/shm",
+		},
+		{
+			Name:      "scratch",
+			MountPath: "/scratch",
+		},
+	}
+	if n.GetProxyCertConfigMap() != "" {
+		volumeMounts = append(volumeMounts, k8sutil.GetUpdateCaCertInitContainerVolumeMounts()...)
 	}
 	return volumeMounts
 }
@@ -985,7 +1023,6 @@ func (n *NIMService) GetInitContainers() []corev1.Container {
 			ImagePullPolicy: corev1.PullPolicy(n.GetImagePullPolicy()),
 			Command:         k8sutil.GetUpdateCaCertInitContainerCommand(),
 			SecurityContext: k8sutil.GetUpdateCaCertInitContainerSecurityContext(),
-			VolumeMounts:    k8sutil.GetUpdateCaCertInitContainerVolumeMounts(),
 		})
 	}
 	for _, ic := range n.Spec.InitContainers {
