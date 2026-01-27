@@ -418,6 +418,7 @@ func (n *NIMCache) GetInitContainers() []corev1.Container {
 			Command:         ic.Command,
 			Args:            ic.Args,
 			Env:             ic.Env,
+			WorkingDir:      ic.WorkingDir,
 		})
 	}
 

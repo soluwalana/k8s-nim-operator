@@ -1040,6 +1040,7 @@ func (n *NIMService) GetInitContainers() []corev1.Container {
 			Command:         ic.Command,
 			Args:            ic.Args,
 			Env:             ic.Env,
+			WorkingDir:      ic.WorkingDir,
 		})
 	}
 	return res
@@ -1249,12 +1250,12 @@ func (n *NIMService) GetDeploymentParams() *rendertypes.DeploymentParams {
 		})
 	}
 	params.InitContainers = n.GetInitContainers()
-	for _, ic := range params.InitContainers {
-		ic.Env = utils.MergeEnvVars(params.Env, ic.Env)
+	for idx := range params.InitContainers {
+		params.InitContainers[idx].Env = utils.MergeEnvVars(params.Env, params.InitContainers[idx].Env)
 	}
 	params.SidecarContainers = n.GetSidecarContainers()
-	for _, sc := range params.SidecarContainers {
-		sc.Env = utils.MergeEnvVars(params.Env, sc.Env)
+	for idx := range params.SidecarContainers {
+		params.SidecarContainers[idx].Env = utils.MergeEnvVars(params.Env, params.SidecarContainers[idx].Env)
 	}
 	return params
 }
@@ -1312,12 +1313,12 @@ func (n *NIMService) GetLWSParams() *rendertypes.LeaderWorkerSetParams {
 	params.RuntimeClassName = n.GetRuntimeClassName()
 
 	params.InitContainers = n.GetInitContainers()
-	for _, ic := range params.InitContainers {
-		ic.Env = utils.MergeEnvVars(n.getLWSCommonEnv(), ic.Env)
+	for idx := range params.InitContainers {
+		params.InitContainers[idx].Env = utils.MergeEnvVars(n.getLWSCommonEnv(), params.InitContainers[idx].Env)
 	}
 	params.SidecarContainers = n.GetSidecarContainers()
-	for _, sc := range params.SidecarContainers {
-		sc.Env = utils.MergeEnvVars(n.getLWSCommonEnv(), sc.Env)
+	for idx := range params.SidecarContainers {
+		params.SidecarContainers[idx].Env = utils.MergeEnvVars(n.getLWSCommonEnv(), params.SidecarContainers[idx].Env)
 	}
 	return params
 }
@@ -1814,8 +1815,13 @@ func (n *NIMService) GetInferenceServiceParams(
 	params.Ports = n.GetInferenceServicePorts(deploymentMode)
 
 	params.InitContainers = n.GetInitContainers()
+	for idx := range params.InitContainers {
+		params.InitContainers[idx].Env = utils.MergeEnvVars(n.getLWSCommonEnv(), params.InitContainers[idx].Env)
+	}
 	params.SidecarContainers = n.GetSidecarContainers()
-
+	for idx := range params.SidecarContainers {
+		params.SidecarContainers[idx].Env = utils.MergeEnvVars(n.getLWSCommonEnv(), params.SidecarContainers[idx].Env)
+	}
 	return params
 }
 
