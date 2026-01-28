@@ -1078,7 +1078,7 @@ var _ = Describe("NIMCache Controller", func() {
 
 			nimCache := &appsv1alpha1.NIMCache{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:        "test-nimcache-reconcile-init",
+					Name:        "test-nimcache-init",
 					Namespace:   "default",
 					Annotations: map[string]string{SelectedNIMProfilesAnnotationKey: string(profilesJSON)},
 				},
@@ -1098,6 +1098,14 @@ var _ = Describe("NIMCache Controller", func() {
 					},
 				},
 			}
+			// Create manifest configmap for this specific NIMCache
+			filePath := filepath.Join("testdata", "manifest_trtllm.yaml")
+			nimparser := nimparserv1.NIMParser{}
+			manifestData, err := nimparser.ParseModelManifest(filePath)
+			Expect(err).NotTo(HaveOccurred())
+			err = reconciler.createManifestConfigMap(ctx, nimCache, &manifestData)
+			Expect(err).NotTo(HaveOccurred())
+
 			Expect(cli.Create(ctx, nimCache)).To(Succeed())
 
 			// Reconcile the resource
