@@ -77,7 +77,7 @@ spec:
           securityContext:
             {{ .SecurityContext | yaml | nindent 12 }}
           {{- end }}
-          {{- if .VoumeMounts }}
+          {{- if .VolumeMounts }}
           volumeMounts:
             {{- range .VolumeMounts }}
             - name: {{ .Name }}
@@ -267,7 +267,7 @@ spec:
           securityContext:
             {{ .SecurityContext | yaml | nindent 12 }}
           {{- end }}
-          {{- if .VoumeMounts }}
+          {{- if .VolumeMounts }}
           volumeMounts:
             {{- range .VolumeMounts }}
             - name: {{ .Name }}

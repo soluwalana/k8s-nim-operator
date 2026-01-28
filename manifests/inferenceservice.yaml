@@ -78,7 +78,7 @@ spec:
       securityContext:
         {{ .SecurityContext | yaml | nindent 8 }}
       {{- end }}
-      {{- if .VoumeMounts }}
+      {{- if .VolumeMounts }}
       volumeMounts:
         {{- range .VolumeMounts }}
         - name: {{ .Name }}
@@ -123,7 +123,6 @@ spec:
       startupProbe:
         {{ . | yaml | nindent 8 }}
       {{- end }}
-      {{- if .PodResourceClaims }}
     {{- range .SidecarContainers }}
     - name: {{ .Name }}
       image: {{ .Image }}
@@ -157,6 +156,7 @@ spec:
           readOnly: {{ .ReadOnly }}
         {{- end }}
     {{- end }}
+    {{- if .PodResourceClaims }}
     resourceClaims:
       {{- .PodResourceClaims | yaml | nindent 8 }}
     {{- end }}
